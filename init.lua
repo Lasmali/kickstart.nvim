@@ -595,6 +595,18 @@ require('lazy').setup({
         end,
       })
 
+      local function ruff_cmd(bufnr)
+        local root = vim.fs.root(bufnr, { 'uv.lock', 'pyproject.toml', '.git' }) or vim.fn.getcwd()
+        local venv_ruff = vim.fs.joinpath(root, '.venv', 'bin', 'ruff')
+        local pyproject = vim.fs.joinpath(root, 'pyproject.toml')
+
+        if vim.uv.fs_stat(venv_ruff) then return { venv_ruff, 'server' } end
+        if vim.uv.fs_stat(vim.fs.joinpath(root, 'uv.lock')) then return { 'uv', 'run', '--no-sync', 'ruff', 'server' } end
+        if vim.uv.fs_stat(pyproject) and vim.fn.readfile(pyproject, '', 200):concat('\n'):find('ruff', 1, true) then return { 'uv', 'run', '--no-sync', 'ruff', 'server' } end
+
+        return { 'ruff', 'server' }
+      end
+
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --  See `:help lsp-config` for information about keys and how to configure
@@ -612,6 +624,7 @@ require('lazy').setup({
         -- ts_ls = {},
 
         ruff = {
+          cmd = ruff_cmd(0),
           on_attach = function(client)
             client.server_capabilities.hoverProvider = false
           end,
