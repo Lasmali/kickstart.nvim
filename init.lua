@@ -595,15 +595,22 @@ require('lazy').setup({
         end,
       })
 
+      -- Prefer the Ruff version from the current project when available so the
+      -- LSP behavior matches the version pinned by uv, but still allow a global
+      -- Ruff install (or Mason-managed Ruff) as a fallback outside those projects.
       local function ruff_cmd(bufnr)
         local root = vim.fs.root(bufnr, { 'uv.lock', 'pyproject.toml', '.git' }) or vim.fn.getcwd()
         local venv_ruff = vim.fs.joinpath(root, '.venv', 'bin', 'ruff')
         local pyproject = vim.fs.joinpath(root, 'pyproject.toml')
 
+        -- If the project has a local virtualenv, use that Ruff directly.
         if vim.uv.fs_stat(venv_ruff) then return { venv_ruff, 'server' } end
+        -- Otherwise, prefer `uv run` for uv-managed projects so Ruff comes from
+        -- the project environment instead of PATH.
         if vim.uv.fs_stat(vim.fs.joinpath(root, 'uv.lock')) then return { 'uv', 'run', '--no-sync', 'ruff', 'server' } end
         if vim.uv.fs_stat(pyproject) and vim.fn.readfile(pyproject, '', 200):concat('\n'):find('ruff', 1, true) then return { 'uv', 'run', '--no-sync', 'ruff', 'server' } end
 
+        -- Fall back to whatever global Ruff is available.
         return { 'ruff', 'server' }
       end
 
