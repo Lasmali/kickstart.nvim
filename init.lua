@@ -90,6 +90,11 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Disable Neovim's Python provider because this config uses LSP-based Python
+-- tooling (`ruff`, `ty`) rather than Python-host plugins. Remove this if you
+-- start using plugins or commands that require `:python3`/`pynvim`.
+vim.g.loaded_python3_provider = 0
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
