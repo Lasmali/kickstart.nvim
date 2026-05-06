@@ -69,7 +69,7 @@ function M.setup()
     desc = 'Run a buffer-local command in the latest terminal after writing',
   })
 
-  vim.cmd [[cnoreabbrev <expr> wr getcmdtype() == ':' && getcmdline() ==# 'wr' ? 'TermCmdOnWrite' : 'wr']]
+  vim.cmd [[cnoreabbrev <expr> tcow getcmdtype() == ':' && getcmdline() ==# 'tcow' ? 'TermCmdOnWrite' : 'tcow']]
 end
 
 return M
